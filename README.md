@@ -1,3 +1,7 @@
+```mermaid
+flowchart LR
+    A --> B
+
 %% --- Subgraph: Analytics ---
 subgraph Analytics["Analytics"]
     ATH["Athena\nevents_flat, snapshots"]
