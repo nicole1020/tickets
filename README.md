@@ -1,28 +1,31 @@
 flowchart LR
+    %% --- Subgraph: Web Monitoring / RAG ---
     subgraph WebMonitoring["LambdaWatcher: Web Monitoring + RAG"]
-        LW[LambdaWatcher Lambda<br/>lambda_handler + watch_once]
-        S3[(S3 s3agile<br/>raw/, snapshots/, events/)]
-        OA[OpenAI API<br/>embeddings + summaries]
-        VS[(Vector Store<br/>FAISS / in-memory)]
+        LW["LambdaWatcher Lambda\nlambda_handler + watch_once"]
+        S3["S3 s3agile\nraw/, snapshots/, events/"]
+        OA["OpenAI API\nembeddings + summaries"]
+        VS["Vector Store\nFAISS / in-memory"]
     end
 
+    %% --- Subgraph: Analytics ---
     subgraph Analytics["Analytics"]
-        ATH[Athena<br/>events_flat, snapshots]
-        PBI[Power BI<br/>Athena ODBC]
+        ATH["Athena\nevents_flat, snapshots"]
+        PBI["Power BI\nAthena ODBC"]
     end
 
+    %% --- Subgraph: Ticketing / Decisions ---
     subgraph Tickets["Ticketing / Decisions"]
-        RM[Redmine<br/>Issues + Custom Fields]
-        HUM[Humans<br/>Analysts / PMs]
-        AGENT[Other AI Agents<br/>(future)]
+        RM["Redmine\nIssues + Custom Fields"]
+        HUM["Humans\nAnalysts / PMs"]
+        AGENT["Other AI Agents\n(future)"]
     end
 
     %% LambdaWatcher flow
-    LW -->|fetch_url_text| WEB[Watched Websites<br/>(e.g. GitHub topics/recipes)]
+    LW -->|fetch_url_text| WEB["Watched Websites\ne.g. GitHub topics/recipes"]
     WEB --> LW
     LW -->|save_raw_to_s3| S3
-    LW -->|ensure_baseline_exists<br/>save_snapshot| S3
-    LW -->|write_change_event_to_s3<br/>events/YYYY/MM/DD/...| S3
+    LW -->|ensure_baseline_exists\nsave_snapshot| S3
+    LW -->|write_change_event_to_s3\nevents/YYYY/MM/DD/...| S3
 
     %% RAG
     LW -->|embed_texts_openai| OA
@@ -30,7 +33,7 @@ flowchart LR
     LW --> VS
 
     %% Ticket creation
-    LW -->|on significant change<br/>create_redmine_issue| RM
+    LW -->|on significant change\ncreate_redmine_issue| RM
 
     %% Analytics side
     S3 --> ATH
@@ -38,5 +41,5 @@ flowchart LR
     RM -->|issues, status, severity| PBI
 
     %% People / other agents
-    RM <---> HUM
-    RM <---> AGENT
+    RM <--> HUM
+    RM <--> AGENT
